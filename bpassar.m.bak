@@ -1,0 +1,340 @@
+function [ xbp, sebp ] = bpassar(x,updc,lpdc,n,nar,tcode,seflag)
+%BPASSAR Bandpass with AR padding for ends.
+%  Translated from Gauss code by Emil Verner, Summer 2013
+%   Input:
+%     x     = series to be filtered
+%     updc  = period corresponding to upper cutoff frequency
+%     lpdc  = period corresponding to lower cutoff frequency
+%     n     = numbers of terms in moving average filter
+%     nar   = order of AR used for padding
+%     tcode = transformation code for AR model
+%              0 -- no transformation
+%              1 -- first difference
+%    setflag= flag for standard errors (associated with endpoint problem)
+%             0 -- no SEs computed
+%             1 -- SEs computed
+%
+%   Output:
+%    xfiltered = filtered value of series, x
+%    stderror  = standard errors
+
+%-- Adjust for Missing Values at Beginning and/or End of Series --%
+
+trnd = ( 1:1:length(x) )';
+tmp  = horzcat(x,trnd);
+tmp=packr(tmp);
+xpack=tmp(:,1);
+trndpack=tmp(:,2);
+n1   = trndpack(1) -1 ; %number of periods lost in beginning
+n2   = trnd(end) - trndpack(end); %number of periods lost at end
+if (trndpack(end) - trndpack(1) +1) ~= length(trndpack); 
+     disp('Missing observations in interior of X ... ')
+     disp('Processing Stops')
+    return;                         
+end
+x = xpack;
+
+
+%-- Pad Series --%
+if tcode == 0 ; xtran = x; end;
+if tcode == 1 ; xtran = x(2:end) - x(1:(end-1)); end;
+xpad = pad(x,xtran,tcode,n,nar);
+x
+xpad
+
+
+%-- Bandpass Padded Series --%
+xpadf = bpass(xpad,updc,lpdc,n);
+xbp   = xpadf( (n+1): (end-n));
+[xpad,xpadf]
+stop;
+if seflag ==0; sebp = NaN.* ones(length(xbp),1); end
+if seflag ==1;
+    sebp = sebpass(x, xtran, tcode,n,nar,updc,lpdc);
+end
+    
+if n1 >0;
+    xbp = [ NaN.*ones(n1,1) ; xbp] ;
+    sebp= [ NaN.*ones(n1,1) ; sebp];
+end
+
+if n2 >0;
+    xbp = [ xbp ; NaN.* ones(n2,1) ] ;
+    sebp= [ sebp; NaN.* ones(n2,1) ] ;
+end
+
+
+%-- SEBPASS --%
+    function se = sebpass(x,xtran,tcode,n,nar,updc,lpdc);
+        %SEBPASS Compute SEs for Bandpass data (using AR padding) -- SEs
+        %        associated with "endpoint" problems associated with
+        %        estimating pre and postsample variables.
+        
+        if (length(x) < n) ;
+            disp('Rows of X are less than n in SEbpass');
+            disp('Cannot compute SEs');
+            se = NaN .* ones( length(x),1) ;
+        end
+        
+        avec = bpweight(updc,lpdc,n);   %bandpass weights
+        % Compute 1 sided weights %
+        w = avec(n+2:end);
+        xma = ar2ma(x,xtran,tcode,n,nar); %MA Rep computed from AR -- 
+                                          % truncated at n. Normalized with
+                                          % SD error = 1
+        c=zeros(n,n);
+        i=1;
+        while i<=n ;
+            c(i:n,i) = xma(1: (n+1-i) );
+            i = i+1;
+        end
+        
+        se = zeros( length(x),1);
+        i=1;
+        while i <= length(x);
+            %Find distance from end
+            j = length(x) -i +1;
+            j = min( [j ; i] ) ;
+            if j <= n;
+                wc = w'* c(:, j:n);
+                v  = wc * wc';
+             se(i) = sqrt(v);
+            end
+            i=i+1;
+        end
+        
+        
+    end
+        
+
+%-- AR2MA --%
+    function xma = ar2ma(y,yf,tcode,n,nar);
+        %AR2MA  Compute MA Rep from Estimated AR 
+        %       -- truncate after n terms
+        %       -- Allow levels or first differences
+        %       MA Rep computed from AR -- truncated at n
+        %       Normalized with SD of error = 1
+        
+        %- Compute MA Rep for Transformed Series -%
+        xma = zeros(n,1);
+        % Pad out future %
+        w = yf( (nar+1):end);
+        X = ones( length(w),1);
+        i=1;
+        while i <= nar;
+            X = [X, yf( (nar+1-i): (end-i)) ];
+            i = i+1;
+        end
+        beta = ( X' * X) \ (X' * w);
+          e  = w - X*beta ;
+         ve  = e'*e / ( size(X,1) - size(X,2)) ;
+         se  = sqrt(ve);          %standard error of regression
+         beta= beta(2:end);
+         comp= zeros(nar,nar);    %companion matrix
+         comp(1,:)= beta';
+         if nar >1;
+             comp( (2:nar), 1:(nar-1)) = eye(nar-1);
+         end
+         z = zeros(nar,1);
+         z(1) = 1;
+         xma(1)= 1;
+         i=2;
+         while i <=n;
+             z = comp*z;              %%%% !!! IS THIS RIGHT??? !!! NOT SURE I UNDERSTAND THIS
+         xma(i)= z(1);
+             i = i+1;
+         end
+         
+           xma = xma*se;
+           if tcode == 1;
+               xma = cumsum(xma);
+           end
+         
+    end
+        
+        
+    
+
+%-- BPWEIGHT --%
+    function avec = bpweight(updc,lpdc,n);
+        %BPWEIGHT  Computes bandpass filter weights using upper and lower
+        %          cutoff periods.
+        % Input:
+        %   updc = Period corresponding to upper cutoff frequency
+        %   lpdc = Period corresponding to lower cutoff frequency
+        %      n = number of terms in moving average filter
+        %Note: updc = 2 makes this a high pass filter (since period=2
+        %      implies omega=pi)
+               
+        % Implied frequencies %
+        omubar = 2*pi / updc;
+        omlbar = 2*pi / lpdc; 
+        
+        %To construct a low pass filter, with cutoff at frequency of
+        %"ombar", we note that the transfer function of the approximating
+        %filter is given by:
+        %
+        %  alpha(om) = a0 + a1 cos(om) + ...+ aK cos(K om)
+        %
+        %and the ak's are given by:
+        %
+        % a0 = ombar/pi
+        %
+        % ak = sin(k ombar)/ (k pi)
+        %
+        %where ombar is the cutoff frequency
+        
+        %We employ the fact that a bandpass filter is the difference
+        %between two low pass filters, 
+        %             bp(L) = bu(L) - bl(L)
+        %with bu(L) being the filter witht he high cutoff point and bl(L)
+        %being that with the low cutoff point.
+        
+        %Define the vector of k's to be studied %
+        
+        %Set the grid for om %
+        step =0.01; np=(2/step) + 1;
+        om = (-1:step:1)'; %evenly spaced grip from -1 to 1.
+        
+        om = pi*om;
+        omp= om./pi;
+        
+        akvec = zeros(n+1,1); %initialize output matrix
+        akvec(1) = (omubar - omlbar) / (pi) ;               % c_0
+        
+        kk=1;
+        while kk <=n; %loop over specified k's to construct filter weights
+            akvec(kk+1) = ( sin(kk*omubar)-sin(kk*omlbar) ) / (kk*pi); %construct  c_j = (j pi)^-1 [ sin(j w_upper) - sin(j w_lower)]  (see Watson 2007)
+            kk = kk+1;
+        end
+        
+        %{ 
+          Impose constraint that transfer is
+              (i)  0 at om = 0  if oml > 0;
+              (ii) 1 at om = 1  if oml ==0;
+          This amounts to requiring that weights sum to zero.
+          Initial sum of weights:
+        %}
+        lam = akvec(1) + 2 * sum( akvec(2:n+1) );
+        
+        % Amount to add to each weight to get sum to add to zero
+        if (omlbar > 0.00000001);
+            lam = - lam/(2*(n+1));
+        else;
+            lam = (1-lam)/(2*(n+1));
+        end
+        akvec = akvec + lam;
+        akvec(1) = akvec(1) + lam;
+        
+        %Set vector of weights
+        
+        avec = zeros(2*n +1,1);
+        avec(n+1) = akvec(1);
+        i=1;
+        while i <= n;
+            avec(n+1-i) = akvec(i+1);
+            avec(n+1+i) = akvec(i+1);
+            i = i+1;
+        end
+    end
+            
+            
+        
+       
+
+
+%-- BPASS --%
+    function xf = bpass(x,updc,lpdc,n);
+        %-- Compute bandpass filtered series usng upper and lower cutoff
+        %   periods.
+        %  Input:
+        %    x = series to be filtered
+        %  updc= Period corresponding to upper cutoff frequency
+        %  lpdc= Period corresponding to lower cutoff frequency
+        %    n = number of terms in moving average filter
+        %Note: updc = 2 makes this a high pass filter (since period=2
+        %      implies omega=pi)
+        %      if lpdc > length(x), frequency is set to zero
+        
+        t = length(x); %number of observations
+        avec = bpweight(updc,lpdc,n); %bandpass weights
+        avec
+        
+        xf = NaN .* ones(t,1);
+        j=n+1;
+        while j <= t-n;
+            xf(j) = x(j-n:j+n)' * avec;         %%%% !!! CHECK IF THIS MATRIX MULT WORKS !!!!!!!!!!!!!!!!!!!!!!!!!!
+            j = j+1;
+        end
+    end
+        
+
+
+%-- PAD --%%
+    function ypad = pad(y,yf,fcode,n,nar);
+        %-- Pad Data series y out using AR Forecasts and Backcasts
+        %        y = series to be padded
+        %       yf = ddata to use in AR (levels of diffs)
+        %     fcode= 1 if yf is first diff of y, otherwise yf=y
+        %        n = number of terms to pad forward and backward
+        %      nar = order of autoregression to use
+        
+        % Pad out future %
+        w = yf(nar+1:end);
+        X = ones(length(w),1);
+        i=1; 
+        while i<=nar ;
+            X = horzcat(X,yf(nar+1-i:(length(yf)-i)) );
+            i = i +1 ; 
+        end
+        beta = (X' * X) \ (X' * w);
+        v=flipud( yf( (end-nar+1):end ) ) ; 
+        forc = zeros(n,1);
+        i=1; 
+        while i <=n ;
+            forc(i) = beta' * [1 ; v];
+            v(2:end)= v(1:(end-1));
+            v(1)    = forc(i);
+                 i  = i+1;
+        end
+        if fcode == 1;
+            forc = cumsum(forc) + ones(n,1) * y(end,1);
+        end
+        ypad = [y ; forc];
+        
+       % Pad out past, by reversing series %
+       yf = flipud( yf) ;
+       if fcode == 1;
+           yf = - yf ;
+       end;
+       w = yf(nar+1:end);
+       X = ones(length(w),1);
+       i=1;
+       while i <=nar;
+           X = [X, yf(nar+1-i:(end-i))];
+           i = i+1 ;
+       end
+       beta = (X' * X) \ (X' * w);
+       v = flipud( yf( (end-nar+1):end)) ;
+       forc = zeros(n,1);
+       i=1;
+       while i<=n;
+           forc(i) = beta' * [1;v];
+           v(2:end)= v(1:(end-1));
+           v(1)    = forc(i);
+                 i = i+1;
+       end
+       if fcode ==1;
+           forc = cumsum(forc) + ones(n,1)*y(1,1);
+       end
+       forc = flipud(forc);
+       ypad = [forc ; ypad];
+    end
+
+           
+           
+            
+    
+   
+    end
+

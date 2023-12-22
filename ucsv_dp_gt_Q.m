@@ -11,17 +11,19 @@ rng(663436);
   % -- File Directories  
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
-  matdir = 'matlab/mat/';
+  matdir = 'matlab/mat/gtQ';
 
   % -- Read in Data --- 
-  load_data = 1;  % 1 if reloading data from Excel, etc 
-  mtoq_agg = 3;   % Temporal aggregation indicator of monthly to quarterly data
+  load_data = 1;    % 1 if reloading data from Excel, etc 
+  mtoq_agg = 3;     % Temporal aggregation indicator of monthly to quarterly data
+  nper = 4;         % Number of periods used for the priors
+  outlabel = 'gtQ'; % Label for results
   
-  % Load data script
-  pcomp_data_calendar_m_and_q_gt;
-
   %% Stating data series used in this script 
   % Data Series Used
+
+  % Load data script
+  pcomp_data_calendar_m_and_q_gt;
 
   % Aggregate series 
   dp_agg = dp_agg_q; % Quarterly
@@ -37,19 +39,14 @@ rng(663436);
   calvec = calvec_q; % Numeric dates quarterly
   dnobs = dnobs_q;   % # of quarterly observations
   calds = calds_q;   % # matrix of [years quarters]
-  nper = 4; % Number of periods used for the priors
   
-  % Label for results
-  outlabel = 'Qgt';
-   
-
   %% Model estimation
 
   % Estimate the model for each of these series: 
   labvec = {'Headline Inflation';'Core XFE';'Core XE'};
   namevec = {'dp_agg';'dp_xfe';'dp_xe'};
+  % Headline, ex Food & Energy, ex Energy
   dp = [dp_agg dp_agg_xfe dp_agg_xe];
-  % dp = [dp_agg]; % Only headline 
 
   % Dates
   first_date = [2001 1];

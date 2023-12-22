@@ -10,26 +10,26 @@ rng(63761);
  % -- File Directories  
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
-  matdir = 'matlab/mat/gtQ/';
+  matdir = 'matlab/mat/gtM/';
   
   % -- Read in Data --- 
   load_data = 1;  % 1 if reloading data from Excel, etc 
-  mtoq_agg = 3;   % Temporal aggregation indicator of monthly to quarterly data
+  mtoq_agg = 0;   % Temporal aggregation indicator of monthly to quarterly data
   pcomp_data_calendar_m_and_q_gt;
   
   % Data Series Used
-  dp_agg = dp_agg_q;
-  dp_agg_xfe = dp_agg_xfe_q;
-  dp_agg_xe = dp_agg_xe_q;
+  dp_agg = dp_agg_m;
+  dp_agg_xfe = dp_agg_xfe_m;
+  dp_agg_xe = dp_agg_xe_m;
   
   % dp_disagg = dp_disagg_q;
   % share_avg = share_avg_q;
   
-  calvec = calvec_q;
-  dnobs = dnobs_q;
-  calds = calds_q;
-  nper = 4;
-  label_suffix = '_gtQ';
+  calvec = calvec_m;
+  dnobs = dnobs_m;
+  calds = calds_m;
+  nper = 12;
+  label_suffix = '_gtM';
   
   % Dates
   first_date = [2001 1];
@@ -83,7 +83,6 @@ rng(63761);
   
   xdates_gt = [2000 2024];
 
-  
   % -- Figure 1: 4 Panel Graph
   figure;
   subplot(2,2,1);
@@ -93,7 +92,7 @@ rng(63761);
   xlim(xdates_gt);
   ylim([-10 15]);
   ax = gca;
-  ax.FontSize = 16;
+  ax.FontSize = 20;
   
   subplot(2,2,2);
   plot(cal_60_end,dp_agg_xe_60_end,'- k','LineWidth',2);
@@ -102,7 +101,7 @@ rng(63761);
   xlim(xdates_gt);
   ylim([-10 15]);
   ax = gca;
-  ax.FontSize = 16;
+  ax.FontSize = 20;
   
   subplot(2,2,3);
   plot(cal_60_end,dp_agg_xfe_60_end,'- k','LineWidth',2);
@@ -111,7 +110,7 @@ rng(63761);
   xlim(xdates_gt);
   ylim([-10 15]);
   ax = gca;
-  ax.FontSize = 16;
+  ax.FontSize = 20;
   
   
   
@@ -129,12 +128,11 @@ rng(63761);
 %  aa
 
   
-
  % -- Figure 2 -----
- font_size = 16; 
- xticks_gt = 2000:2:2023; 
+figure;
 
- figure;
+xticks_gt = 2000:2:2023; 
+font_size = 16; 
 
 subplot(2,2,1); 
   plot(cal_60_end,tau_s_mean_pct_h(:,1),'- b','LineWidth',2);
@@ -145,9 +143,10 @@ subplot(2,2,1);
   titstr = '(a) \tau_{{\itt}} ';
   title(titstr,'FontSize',18);
   legend('IPC','IPCxE','IPCxFE');
+  % legend('IPC','IPCxE');
   legend('Location','southoutside', 'Orientation','horizontal');
   xlim(xdates_gt);
-  ylim([0 12]);
+  ylim([-2 15]);
   xticks(xticks_gt);
   ax = gca;
   ax.FontSize = font_size;

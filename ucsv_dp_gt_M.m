@@ -11,45 +11,44 @@ rng(663436);
   % -- File Directories  
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
-  matdir = 'matlab/mat/';
+  matdir = 'matlab/mat/gtM/';
 
   % -- Read in Data --- 
-  load_data = 1;  % 1 if reloading data from Excel, etc 
-  mtoq_agg = 3;   % Temporal aggregation indicator of monthly to quarterly data
+  load_data = 1;    % 1 if reloading data from Excel, etc 
+  mtoq_agg = 0;     % Temporal aggregation indicator of monthly to quarterly data
+  nper = 12;        % Number of periods used for the priors
+  outlabel = 'gtM'; % Label for results
   
-  % Load data script
-  pcomp_data_calendar_m_and_q_gt;
 
   %% Stating data series used in this script 
   % Data Series Used
 
+  % Load data script
+  pcomp_data_calendar_m_and_q_gt;
+
   % Aggregate series 
-  dp_agg = dp_agg_q; % Quarterly
+  dp_agg = dp_agg_m; % Monthly 
 
   % Excluding food and energy (fe) 
-  dp_agg_xfe = dp_agg_xfe_q; % Quarterly 
+  dp_agg_xfe = dp_agg_xfe_m; % Monthly
   
   % Excluding energy (e) 
-  dp_agg_xe = dp_agg_xe_q; % Quarterly 
+  dp_agg_xe = dp_agg_xe_m; % Monthly 
 
-  % dp_disagg = dp_disagg_q; % Unused in this script 
+  % dp_disagg = dp_disagg_m; % Unused in this script 
  
-  calvec = calvec_q; % Numeric dates quarterly
-  dnobs = dnobs_q;   % # of quarterly observations
-  calds = calds_q;   % # matrix of [years quarters]
-  nper = 4; % Number of periods used for the priors
+  calvec = calvec_m; % Numeric dates quarterly
+  dnobs = dnobs_m;   % # of quarterly observations
+  calds = calds_m;   % # matrix of [years quarters]
   
-  % Label for results
-  outlabel = 'Qgt';
-   
 
   %% Model estimation
 
   % Estimate the model for each of these series: 
   labvec = {'Headline Inflation';'Core XFE';'Core XE'};
   namevec = {'dp_agg';'dp_xfe';'dp_xe'};
+  % Headline, ex Food & Energy, ex Energy
   dp = [dp_agg dp_agg_xfe dp_agg_xe];
-  % dp = [dp_agg]; % Only headline 
 
   % Dates
   first_date = [2001 1];
@@ -68,7 +67,7 @@ rng(663436);
   
   % Parameters for scale mixture of epsilon component
   scl_eps_vec = [1; linspace(2.0,10.0,9)'];
-  ps_mean = 1 - 1/(4*nper);              % Outlier every 4 years
+  ps_mean = 1 - 1/(2*nper);              % Outlier every 2 years
   ps_prior_obs = nper*10;                % Sample size of 10 years for prior
   ps_prior_a = ps_mean*ps_prior_obs;     % "alpha" in beta prior
   ps_prior_b = (1-ps_mean)*ps_prior_obs; % "beta" in beta prior
@@ -153,7 +152,7 @@ rng(663436);
     str_tmp = [matdir 'theta_mean_pct' ulabel]; save(str_tmp,'theta_mean_pct');
     str_tmp = [matdir 'sigma_a_mean_pct' ulabel]; save(str_tmp,'sigma_a_mean_pct');
  
-    % Compute posteriors for scale_eps_values
+    % Compute posteriors for scale_eps_values = s_t 
     pctvec = [1/6 0.50 5/6]';
     scl_eps_pct = post_mean_pct(scl_eps_draws',pctvec);
     str_tmp = [matdir 'scl_eps_pct' ulabel]; save(str_tmp,'scl_eps_pct');

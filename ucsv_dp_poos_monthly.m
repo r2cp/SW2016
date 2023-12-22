@@ -19,6 +19,7 @@ rng(663436);
   load_data = 1;  % 1 if reloading data from Excel, etc 
   mtoq_agg = 0;   % Temporal aggregation indicator of monthly to quarterly data
   pcomp_data_calendar_m_and_q;  
+  
   % Data Series Used
   dp_agg = dp_agg_m;
   dp_agg_xfe = dp_agg_xfe_m;

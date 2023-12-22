@@ -12,14 +12,13 @@ rng(663436);
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
   matdir = 'matlab/mat/';
-%     
-  
+
   % -- Read in Data --- 
   load_data = 1;  % 1 if reloading data from Excel, etc 
   mtoq_agg = 3;   % Temporal aggregation indicator of monthly to quarterly data
   
   % Load data script
-  pcomp_data_calendar_m_and_q;
+  pcomp_data_calendar_m_and_q_gt;
 
   %% Stating data series used in this script 
   % Data Series Used
@@ -33,22 +32,25 @@ rng(663436);
   % Excluding energy (e) 
   dp_agg_xe = dp_agg_xe_q; % Quarterly 
 
-  % This I don't understand 
+  
   % dp_disagg = dp_disagg_q; % Unused in this script 
-  calvec = calvec_q;
-  dnobs = dnobs_q;
-  calds = calds_q;
+  calvec = calvec_q; % Numeric dates quarterly
+  dnobs = dnobs_q;   % # of quarterly observations
+  calds = calds_q;   % # matrix of [years quarters]
   nper = 4;
   outlabel = 'Q3';
    
+
+  %% 
+
   % Estimate the model for each of these series: 
   labvec = {'Headline Inflation';'Core XFE';'Core XE'};
   namevec = {'dp_agg';'dp_xfe';'dp_xe'};
-  % dp = [dp_agg dp_agg_xfe dp_agg_xe];
-  dp = [dp_agg]; % Only aggregate? 
+  dp = [dp_agg dp_agg_xfe dp_agg_xe];
+  % dp = [dp_agg]; % Only headline 
 
   % Dates
-  first_date = [1960 1];
+  first_date = [2001 1];
   last_date = calds(end,:);
   
   ismpl = smpl(calvec,first_date,last_date,nper);

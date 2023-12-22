@@ -44,6 +44,9 @@ aa = repmat(u,1,n) < cum_prob;
 bb = n+1-sum(aa,2);
 scale_e = zeros(T,1);
 for t = 1:T;
+    if bb(t) > length(scale_e_vec)
+        bb(t) = length(scale_e_vec);
+    end
     scale_e(t) = scale_e_vec(bb(t));
 end;
  

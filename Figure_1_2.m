@@ -15,13 +15,16 @@ rng(63761);
   % -- Read in Data --- 
   load_data = 1;  % 1 if reloading data from Excel, etc 
   mtoq_agg = 3;   % Temporal aggregation indicator of monthly to quarterly data
-  pcomp_data_calendar_m_and_q;
+  pcomp_data_calendar_m_and_q_gt;
+  
   % Data Series Used
   dp_agg = dp_agg_q;
   dp_agg_xfe = dp_agg_xfe_q;
   dp_agg_xe = dp_agg_xe_q;
-  dp_disagg = dp_disagg_q;
-  share_avg = share_avg_q;
+  
+  % dp_disagg = dp_disagg_q;
+  % share_avg = share_avg_q;
+  
   calvec = calvec_q;
   dnobs = dnobs_q;
   calds = calds_q;
@@ -29,7 +32,7 @@ rng(63761);
   label_suffix = '_Q3';
   
   % Dates
-  first_date = [1960 1];
+  first_date = [2001 1];
   last_date = calds(end,:);
   ismpl_60_end = smpl(calvec,first_date,last_date,nper);
   cal_60_end = calvec(ismpl_60_end==1);
@@ -38,8 +41,8 @@ rng(63761);
   dp_agg_60_end = dp_agg(ismpl_60_end==1,:);
   dp_agg_xe_60_end = dp_agg_xe(ismpl_60_end==1,:);
   dp_agg_xfe_60_end = dp_agg_xfe(ismpl_60_end==1,:);
-  dp_disagg_60_end = dp_disagg(ismpl_60_end==1,:);
-  share_avg_60_end = share_avg(ismpl_60_end==1,:);
+  % dp_disagg_60_end = dp_disagg(ismpl_60_end==1,:);
+  % share_avg_60_end = share_avg(ismpl_60_end==1,:);
   
   % -- Univariate Filtered and Smoothed Values
   ulabel = ['dp_agg' label_suffix];
@@ -78,31 +81,33 @@ rng(63761);
   var_dtau_mean_pct_xfe = var_dtau_mean_pct;
   scl_eps_pct_xfe = scl_eps_pct;
   
+  xdates_gt = [2000 2023];
+
   % -- Figure 1: 4 Panel Graph
   figure;
   subplot(2,2,1);
   plot(cal_60_end,dp_agg_60_end,'- k','LineWidth',2);
-  titstr = '(a) PCE-all Inflation';
+  titstr = '(a) Headline IPC';
   title(titstr,'FontSize',18);
-  xlim([1955 2020]);
+  xlim(xdates_gt);
   ylim([-10 15]);
   ax = gca;
   ax.FontSize = 20;
   
   subplot(2,2,2);
   plot(cal_60_end,dp_agg_xe_60_end,'- k','LineWidth',2);
-  titstr = '(b) PCExE Inflation ';
+  titstr = '(b) IPCxE Inflation ';
   title(titstr,'FontSize',18);
-  xlim([1955 2020]);
+  xlim(xdates_gt);
   ylim([-10 15]);
   ax = gca;
   ax.FontSize = 20;
   
   subplot(2,2,3);
   plot(cal_60_end,dp_agg_xfe_60_end,'- k','LineWidth',2);
-  titstr = '(c) PCExFE Inflation ';
+  titstr = '(c) IPCxFE Inflation ';
   title(titstr,'FontSize',18);
-  xlim([1955 2020]);
+  xlim(xdates_gt);
   ylim([-10 15]);
   ax = gca;
   ax.FontSize = 20;
@@ -134,9 +139,9 @@ subplot(2,2,1);
   hold off;
   titstr = '(a) \tau_{{\itt}} ';
   title(titstr,'FontSize',18);
-  legend('PCE-all','PCExE','PCExFE');
+  legend('IPC','IPCxE','IPCxFE');
   legend('Location','NorthEast');
-  xlim([1955 2020]);
+  xlim(xdates_gt);
   ylim([0 12]);
   ax = gca;
   ax.FontSize = 20;
@@ -149,7 +154,7 @@ subplot(2,2,1);
   hold off;
   titstr = '(b) \sigma_{\Delta\tau,{\itt}}';
   title(titstr,'FontSize',18);
-  xlim([1955 2020]); 
+  xlim(xdates_gt); 
   set(gca,'fontsize',20)
 
   
@@ -161,7 +166,7 @@ subplot(2,2,3);
   hold off;
   titstr = '(c) \sigma_{\epsilon,{\itt}}';
   title(titstr,'FontSize',18);
-  xlim([1955 2020]);
+  xlim(xdates_gt);
   set(gca,'fontsize',20)
   
  subplot(2,2,4);
@@ -172,7 +177,7 @@ subplot(2,2,3);
   hold off;
   titstr = '(d) {\its}_{{\itt}}';
   title(titstr,'FontSize',18);
-  xlim([1955 2020]);
+  xlim(xdates_gt);
   set(gca,'fontsize',20)
 
  

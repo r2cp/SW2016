@@ -10,7 +10,7 @@ rng(63761);
  % -- File Directories  
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
-  matdir = 'matlab/mat/gtM/';
+  matdir = 'matlab/mat/gtM-nojumps/';
   
   % -- Read in Data --- 
   load_data = 1;  % 1 if reloading data from Excel, etc 

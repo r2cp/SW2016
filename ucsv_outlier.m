@@ -103,7 +103,8 @@ function [tau_draws,tau_f_draws,sigma_dtau_draws,sigma_eps_draws,g_eps_draws,g_d
     ind_dtau = draw_lcs_indicators(dtau,sigma_dtau,r_p,r_m,r_s);
     
     % Step 2(a): Draw G
-    g_eps = draw_g(eps_scaled,g_eps_prior,ind_eps,r_m,r_s,1);
+    % g_eps = draw_g(eps_scaled,g_eps_prior,ind_eps,r_m,r_s,1); 
+    g_eps = 0; % Constant 
     g_dtau = draw_g(dtau,g_dtau_prior,ind_dtau,r_m,r_s,1);
     
     % Step 2(b): Draw Volatilities

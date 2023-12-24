@@ -10,7 +10,7 @@ rng(63761);
  % -- File Directories  
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
-  matdir = 'matlab/mat/gtM/';
+  matdir = 'matlab/mat/gtM-const_vol_e/';
   
   % -- Read in Data --- 
   load_data = 1;  % 1 if reloading data from Excel, etc 
@@ -174,6 +174,7 @@ subplot(2,2,3);
   title(titstr,'FontSize',18);
   xlim(xdates_gt);
   xticks(xticks_gt);
+  ylim([0 6]);
   set(gca,'fontsize',font_size)
   
  subplot(2,2,4);

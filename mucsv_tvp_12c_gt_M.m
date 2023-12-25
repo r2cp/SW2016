@@ -10,9 +10,9 @@ big = 1.0e+6;
 rng(663436);
 
   % -- File Directories  
-  outdir = '/Users/mwatson/Dropbox/p_comp/revision/matlab/out/';
-  figdir = '/Users/mwatson/Dropbox/p_comp/revision/matlab/fig/';
-  matdir = 'matlab/mat/mucsv_tvp_17c_Q3/';
+  outdir = 'matlab/out/';
+  figdir = 'matlab/fig/';
+  matdir = 'matlab/mat/gtM-12c/';
   
 %   % -- Read in Data --- 1
 %   load_data = 1;  % 1 if reloading data from Excel, etc 
@@ -34,21 +34,25 @@ rng(663436);
   
   % -- Read in Data --- 
   load_data = 1;  % 1 if reloading data from Excel, etc 
-  mtoq_agg = 3;   % Temporal aggregation indicator of monthly to quarterly data
-  pcomp_data_calendar_m_and_q;
+  mtoq_agg = 0;   % Temporal aggregation indicator of monthly to quarterly data
+  nper = 12;
+
+  % Load data
+  pcomp_data_calendar_m_and_q_gt;
+  
   % Data Series Used
-  dp_agg = dp_agg_q;
-  dp_agg_xfe = dp_agg_xfe_q;
-  dp_agg_xe = dp_agg_xe_q;
-  dp_disagg = dp_disagg_q;
-  share_avg = share_avg_q;
-  share_avg_xfe = share_avg_xfe_q;
-  share_avg_xe = share_avg_xe_q;
-  calvec = calvec_q;
-  dnobs = dnobs_q;
-  calds = calds_q;
-  nper = 4;
-  mlabel = '_mucsv_tvp_17c_Q3';
+  
+  dp_disagg = dp_disagg_m;
+  
+  share_avg = share_avg_m;
+  % share_avg_xfe = share_avg_xfe_q;
+  % share_avg_xe = share_avg_xe_q;
+
+  calvec = calvec_disagg_m;
+  dnobs = dnobs_disagg_m;
+  calds = calds_disagg_m;
+  
+  mlabel = '_mucsv_tvp_12c_gt_M';
 %   
 %  % -- Read in Data --- 
 %   load_data = 1;  % 1 if reloading data from Excel, etc 
@@ -69,7 +73,7 @@ rng(663436);
 %   mlabel = '_mucsv_tvp_17c_M';
   
   % --- Sample Period for Analyais 
-  first_date = [1960 1];
+  first_date = [2011 1];
   last_date = calds(end,:);
   ismpl = smpl(calvec,first_date,last_date,nper);
   calvec_ismpl = calvec(ismpl==1);
@@ -78,14 +82,14 @@ rng(663436);
  
   % Parameters for UCSV Draws
   n_burnin = 1000;  % Discarded Draws
-  n_draws_save = 1000;  % Number of Draws to Save
+  n_draws_save = 2000;  % Number of Draws to Save
   k_draws = 10;         % Save results every k_draws
   
   n_draws =  n_draws_save*k_draws;   % Total Number of Draws after burnin
   
   % Parameters for scale mixture of epsilon component
   scl_eps_vec = [1; linspace(2.0,10.0,9)'];
-  ps_mean = 1 - 1/(4*nper);              % Outlier every 4 years
+  ps_mean = 1 - 1/(2*nper);              % Outlier every 2 years
   ps_prior_obs = nper*10;                % Sample size of 10 years for prior
   ps_prior_a = ps_mean*ps_prior_obs;     % "alpha" in beta prior
   ps_prior_b = (1-ps_mean)*ps_prior_obs; % "beta" in beta prior
@@ -105,7 +109,7 @@ rng(663436);
    sd_ddp(i) = std(tmp(inan==0));
   end;
   sd_ddp_median = median(sd_ddp);
-  scale_y = sd_ddp_median/5;
+  scale_y = sd_ddp_median/4; % Modified from /5
   dp_mat_n = dp_mat/scale_y;
   
   % -- Parameters for model
@@ -170,7 +174,9 @@ rng(663436);
    prior_var_alpha = zeros(2*n_y,2*n_y);
    prior_var_alpha(1:n_y,1:n_y) = var_alpha_eps;
    prior_var_alpha(n_y+1:2*n_y,n_y+1:2*n_y) = var_alpha_tau;
+   
    % Alpha TVP parameters -- use "Number of prior obs (nu) and prior squared (s2)" as parameters .. as in Del Negro and Otrok;
+   % Might be some of these parameters
    nu_prior_alpha = 0.1*notim;             
    s2_prior_alpha = (0.25/sqrt(notim))^2;
    s2_prior_alpha = s2_prior_alpha/(scale_y^2);
@@ -605,8 +611,8 @@ rng(663436);
   % Chain Weights over this sample period 
   cw = share_avg(ismpl==1,:);
   cw_sq = cw.^2;
-  cw_xfe = share_avg_xfe(ismpl==1,:);
-  cw_xe = share_avg_xe(ismpl==1,:);
+%   cw_xfe = share_avg_xfe(ismpl==1,:);
+%   cw_xe = share_avg_xe(ismpl==1,:);
   
   
   agg_tau_common_draws = NaN*ones(notim,n_draws_save);
@@ -614,29 +620,28 @@ rng(663436);
   agg_f_tau_common_draws = NaN*ones(notim,n_draws_save);
   agg_f_tau_unique_draws = NaN*ones(notim,n_draws_save);
   
-  agg_tau_common_xfe_draws = NaN*ones(notim,n_draws_save);
-  agg_tau_unique_xfe_draws = NaN*ones(notim,n_draws_save);
-  
-  agg_tau_common_xe_draws = NaN*ones(notim,n_draws_save);
-  agg_tau_unique_xe_draws = NaN*ones(notim,n_draws_save);
-  
+%   agg_tau_common_xfe_draws = NaN*ones(notim,n_draws_save);
+%   agg_tau_unique_xfe_draws = NaN*ones(notim,n_draws_save);
+%   
+%   agg_tau_common_xe_draws = NaN*ones(notim,n_draws_save);
+%   agg_tau_unique_xe_draws = NaN*ones(notim,n_draws_save);
+   
   var_agg_eps_common_total_draws = NaN*ones(notim,n_draws_save);
   var_agg_eps_unique_total_draws = NaN*ones(notim,n_draws_save);
   var_agg_dtau_common_draws = NaN*ones(notim,n_draws_save);
   var_agg_dtau_unique_draws = NaN*ones(notim,n_draws_save);
-  
   for t = 1:notim;
       tmp = y_tau_common_draws(t,:,:);
       tmp = reshape(tmp,n_y,n_draws_save);
       agg_tau_common_draws(t,:) = cw(t,:)*tmp;
-      agg_tau_common_xfe_draws(t,:) = cw_xfe(t,:)*tmp;
-      agg_tau_common_xe_draws(t,:) = cw_xe(t,:)*tmp;
+%       agg_tau_common_xfe_draws(t,:) = cw_xfe(t,:)*tmp;
+%       agg_tau_common_xe_draws(t,:) = cw_xe(t,:)*tmp;
       
       tmp = y_tau_unique_draws(t,:,:);
       tmp = reshape(tmp,n_y,n_draws_save);
       agg_tau_unique_draws(t,:) = cw(t,:)*tmp;
-      agg_tau_unique_xfe_draws(t,:) = cw_xfe(t,:)*tmp;
-      agg_tau_unique_xe_draws(t,:) = cw_xe(t,:)*tmp;
+%       agg_tau_unique_xfe_draws(t,:) = cw_xfe(t,:)*tmp;
+%       agg_tau_unique_xe_draws(t,:) = cw_xe(t,:)*tmp;
       
       tmp = y_f_tau_common_draws(t,:,:);
       tmp = reshape(tmp,n_y,n_draws_save);
@@ -675,8 +680,8 @@ rng(663436);
   var_y_dtau_unique_draws = 1;
   
   agg_tau_draws = agg_tau_common_draws + agg_tau_unique_draws;
-  agg_tau_xfe_draws = agg_tau_common_xfe_draws + agg_tau_unique_xfe_draws;
-  agg_tau_xe_draws = agg_tau_common_xe_draws + agg_tau_unique_xe_draws;
+%   agg_tau_xfe_draws = agg_tau_common_xfe_draws + agg_tau_unique_xfe_draws;
+%   agg_tau_xe_draws = agg_tau_common_xe_draws + agg_tau_unique_xe_draws;
   agg_f_tau_draws = agg_f_tau_common_draws + agg_f_tau_unique_draws;
   var_agg_eps_total_draws = var_agg_eps_common_total_draws + var_agg_eps_unique_total_draws;
   var_agg_dtau_draws = var_agg_dtau_common_draws + var_agg_dtau_unique_draws;
@@ -691,8 +696,8 @@ rng(663436);
   agg_tau_common_mean_pct = post_mean_pct(agg_tau_common_draws',pctvec);
   agg_tau_unique_mean_pct = post_mean_pct(agg_tau_unique_draws',pctvec);
   agg_tau_mean_pct = post_mean_pct(agg_tau_draws',pctvec);
-  agg_tau_xfe_mean_pct = post_mean_pct(agg_tau_xfe_draws',pctvec);
-  agg_tau_xe_mean_pct = post_mean_pct(agg_tau_xe_draws',pctvec);
+%   agg_tau_xfe_mean_pct = post_mean_pct(agg_tau_xfe_draws',pctvec);
+%   agg_tau_xe_mean_pct = post_mean_pct(agg_tau_xe_draws',pctvec);
   agg_f_tau_common_mean_pct = post_mean_pct(agg_f_tau_common_draws',pctvec);
   agg_f_tau_unique_mean_pct = post_mean_pct(agg_f_tau_unique_draws',pctvec);
   agg_f_tau_mean_pct = post_mean_pct(agg_f_tau_draws',pctvec);
@@ -709,8 +714,8 @@ rng(663436);
   str_tmp = [matdir 'agg_f_tau_common_mean_pct' mlabel]; save(str_tmp,'agg_f_tau_common_mean_pct');          
   str_tmp = [matdir 'agg_f_tau_unique_mean_pct' mlabel]; save(str_tmp,'agg_f_tau_unique_mean_pct');
   str_tmp = [matdir 'agg_tau_mean_pct' mlabel]; save(str_tmp,'agg_tau_mean_pct');
-  str_tmp = [matdir 'agg_tau_xfe_mean_pct' mlabel]; save(str_tmp,'agg_tau_xfe_mean_pct');
-  str_tmp = [matdir 'agg_tau_xe_mean_pct' mlabel]; save(str_tmp,'agg_tau_xe_mean_pct');
+%   str_tmp = [matdir 'agg_tau_xfe_mean_pct' mlabel]; save(str_tmp,'agg_tau_xfe_mean_pct');
+%   str_tmp = [matdir 'agg_tau_xe_mean_pct' mlabel]; save(str_tmp,'agg_tau_xe_mean_pct');
   str_tmp = [matdir 'agg_f_tau_mean_pct' mlabel]; save(str_tmp,'agg_f_tau_mean_pct'); 
   
   agg_tau_mean = mean(agg_tau_draws,2);
@@ -745,6 +750,7 @@ rng(663436);
   str_tmp = [matdir 'disagg_tau_mean' mlabel]; save(str_tmp,'disagg_tau_mean');  
   str_tmp = [matdir 'agg_f_tau_mean_sd' mlabel]; save(str_tmp,'agg_f_tau_mean_sd'); 
   str_tmp = [matdir 'agg_tau_mean_sd' mlabel]; save(str_tmp,'agg_tau_mean_sd');
+  
   
   
   % ----- Compute and Save average values of factor loadings and standard deviations of shocks

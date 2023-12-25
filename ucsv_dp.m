@@ -11,7 +11,7 @@ rng(663436);
   % -- File Directories  
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
-  matdir = 'matlab/mat/';
+  matdir = 'matlab/mat/mucsv_tvp_17c_Q3/';
 %     
   
   % -- Read in Data --- 

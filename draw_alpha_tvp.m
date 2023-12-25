@@ -23,6 +23,7 @@ function [alpha_eps, alpha_tau, dalpha_eps, dalpha_tau] = draw_alpha_tvp(y,prior
      X1t(:,1)=X1; 
      P1t(:,:,1)=P1;
      H = zeros(n_state,n_y);
+     % Kalman filtering
      for t = 1:nobs;
       yt = y(t,:)';
       H(1:n_y,:) = eps_common(t,1)*eye(n_y);

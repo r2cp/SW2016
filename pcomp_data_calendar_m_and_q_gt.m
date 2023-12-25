@@ -12,6 +12,12 @@ if load_data == 1;
 [dnobs_m,calvec_m,calds_m] = calendar_make([2000 12], [2023 9], 12);
 [dnobs_q,calvec_q,calds_q] = calendar_make([2000 12] , [2023 9], 4);
 
+
+% ----------- Sample Period, Calendars and so forth for disagg data GT
+[dnobs_disagg_m,calvec_disagg_m,calds_disagg_m] = calendar_make([2011 1], [2023 11], 12);
+
+
+
 %% 
 %{ 
 %
@@ -150,13 +156,18 @@ n_incl = size(p_disagg,2);
 
 %% Load GT data
 
-% Loads GT data = p_gt 
+% Loads GT data = p_gt
 load("data/gt_data.mat") 
+
+% Disaggregated data = p_disagg_gt -> December 2010 -- November 2023
+% Weights in share_disagg_m
+load('data/gt_disagg_data.mat')
 
 % Load raw data series
 p_agg = p_gt(1:end-2, 1); 
 p_agg_xfe = p_gt(1:end-2, 2); 
 p_agg_xe = p_gt(1:end-2, 3); 
+p_disagg = p_disagg_gt; 
 
  % Compute Various Inflation Measures for Aggregate and Dissaggregate PCE
  % -- Monthly data
@@ -165,7 +176,7 @@ p_agg_xe = p_gt(1:end-2, 3);
  p_agg_xe_m = p_agg_xe; % Monthly ex energy 
 
  % For disaggregated data
- % p_disagg_m = p_disagg; % Monthly disaggregated data
+ p_disagg_m = p_disagg; % Monthly disaggregated data
  
 
  %{
@@ -199,7 +210,9 @@ p_agg_xe = p_gt(1:end-2, 3);
  dp_agg_m = paar*dif(log(p_agg_m),1);
  dp_agg_xfe_m = paar*dif(log(p_agg_xfe_m),1);
  dp_agg_xe_m = paar*dif(log(p_agg_xe_m),1);
- % dp_disagg_m = paar*dif(log(p_disagg_m),1);
+ 
+ tmp_disagg_m = paar*dif(log(p_disagg_m),1); 
+ dp_disagg_m = tmp_disagg_m(2:end, :);
  
  % --- Quarterly Inflation ----
  paar = 400;
@@ -207,6 +220,9 @@ p_agg_xe = p_gt(1:end-2, 3);
  dp_agg_xfe_q = paar*dif(log(p_agg_xfe_q),1);
  dp_agg_xe_q = paar*dif(log(p_agg_xe_q),1);
  % dp_disagg_q = paar*dif(log(p_disagg_q),1);
+
+ % --- Weights  --- 
+ share_avg_m = share_disagg_m; 
 
 %%
 

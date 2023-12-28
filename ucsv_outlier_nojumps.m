@@ -1,4 +1,4 @@
-function [tau_draws,tau_f_draws,sigma_dtau_draws,sigma_eps_draws,g_eps_draws,g_dtau_draws,scl_eps_draws,sigmatotal_eps_draws,ps_draws] = ucsv_outlier(y,n_burnin,n_draws,k_draws,g_eps_prior,g_dtau_prior,scl_eps_vec,ps_prior)
+function [tau_draws,tau_f_draws,sigma_dtau_draws,sigma_eps_draws,g_eps_draws,g_dtau_draws,scl_eps_draws,sigmatotal_eps_draws,ps_draws] = ucsv_outlier_nojumps(y,n_burnin,n_draws,k_draws,g_eps_prior,g_dtau_prior,scl_eps_vec,ps_prior)
 
 % Model and notation
   %  y(t) = tau(t) + eps(t)
@@ -111,10 +111,15 @@ function [tau_draws,tau_f_draws,sigma_dtau_draws,sigma_eps_draws,g_eps_draws,g_d
     sigma_dtau = draw_sigma(dtau,g_dtau,ind_dtau,r_m,r_s,1);	
     
     % Step 3: Draw Scale of epsilon
-    scale_eps = draw_scale_eps(eps,sigma_eps,ind_eps,r_m,r_s,scl_eps_vec,prob_scl_eps_vec);
+    % scale_eps = draw_scale_eps(eps,sigma_eps,ind_eps,r_m,r_s,scl_eps_vec,prob_scl_eps_vec);
+    % Scale for epsilon = 1
+    scale_eps = ones(T, 1); 
 
     % Step 4; Draw probability of outlier;
-    prob_scl_eps_vec = draw_ps(scale_eps,ps_prior,n_scl_eps);
+    % prob_scl_eps_vec = draw_ps(scale_eps,ps_prior,n_scl_eps);
+    % Remove probability of outlier
+    prob_scl_eps_vec(1) = 1; 
+    prob_scl_eps_vec(2:end) = 0; 
    
     % Save draws;
     if idraw > n_burnin;

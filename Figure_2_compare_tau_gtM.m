@@ -12,7 +12,8 @@ rng(63761);
   figdir = 'matlab/fig/';
   matdir = 'matlab/mat/gtM/';
   matdir_nojumps = 'matlab/mat/gtM-nojumps/';
-  matdir_constvol = 'matlab/mat/gtM-const_vol_e/';
+  matdir_constvol_eps = 'matlab/mat/gtM-const_vol_e/';
+  matdir_constvol_dtau = 'matlab/mat/gtM-const_vol_dtau/';
 
   % -- Read in Data --- 
   load_data = 1;  % 1 if reloading data from Excel, etc 
@@ -63,12 +64,19 @@ rng(63761);
   str_tmp = [matdir_nojumps 'var_eps_mean_pct' ulabel]; load(str_tmp);
   var_eps_mean_pct_nojumps = var_eps_mean_pct;
 
-  str_tmp = [matdir_constvol 'tau_mean_pct' ulabel]; load(str_tmp);
-  tau_s_mean_pct_constvol = tau_mean_pct;
-  str_tmp = [matdir_constvol 'var_dtau_mean_pct' ulabel]; load(str_tmp);
-  var_dtau_mean_pct_constvol = var_dtau_mean_pct;
-  str_tmp = [matdir_constvol 'var_eps_mean_pct' ulabel]; load(str_tmp);
-  var_eps_mean_pct_constvol = var_eps_mean_pct;
+  str_tmp = [matdir_constvol_eps 'tau_mean_pct' ulabel]; load(str_tmp);
+  tau_s_mean_pct_constvol_eps = tau_mean_pct;
+  str_tmp = [matdir_constvol_eps 'var_dtau_mean_pct' ulabel]; load(str_tmp);
+  var_dtau_mean_pct_constvol_eps = var_dtau_mean_pct;
+  str_tmp = [matdir_constvol_eps 'var_eps_mean_pct' ulabel]; load(str_tmp);
+  var_eps_mean_pct_constvol_eps = var_eps_mean_pct;
+
+  str_tmp = [matdir_constvol_dtau 'tau_mean_pct' ulabel]; load(str_tmp);
+  tau_s_mean_pct_constvol_dtau = tau_mean_pct;
+  str_tmp = [matdir_constvol_dtau 'var_dtau_mean_pct' ulabel]; load(str_tmp);
+  var_dtau_mean_pct_constvol_dtau = var_dtau_mean_pct;
+  str_tmp = [matdir_constvol_dtau 'var_eps_mean_pct' ulabel]; load(str_tmp);
+  var_eps_mean_pct_constvol_dtau = var_eps_mean_pct;
 
   xdates_gt = [2000 2024];
   xticks_gt = 2000:2:2024; 
@@ -80,12 +88,13 @@ rng(63761);
   plot(cal_60_end,tau_s_mean_pct_baseline(:,1),'k-','LineWidth',4);
   hold on;
    plot(cal_60_end,tau_s_mean_pct_nojumps(:,1),'b-','LineWidth',2);
-   plot(cal_60_end,tau_s_mean_pct_constvol(:,1),'r:','LineWidth',2);
+   plot(cal_60_end,tau_s_mean_pct_constvol_eps(:,1),'r:','LineWidth',2);
+   plot(cal_60_end,tau_s_mean_pct_constvol_dtau(:,1),'m-','LineWidth',2);
   hold off;
 
   titstr = '(a) \tau_{{\it t}} ';
   title(titstr,'FontSize',18);
-  legend('Baseline','No Outlier Adjustment','Constant Volatility \epsilon_{\itt}');
+  legend('Baseline','No Outlier Adjustment','Constant Volatility \epsilon_{\itt}','Constant Volatility \Delta\tau_{\itt}');
   legend('Location','southoutside', 'Orientation','horizontal');
   xlim(xdates_gt);
   xticks(xticks_gt);
@@ -100,12 +109,13 @@ rng(63761);
   plot(cal_60_end,var_dtau_mean_pct_baseline(:,1).^0.5,'k-','LineWidth',4);
   hold on;
    plot(cal_60_end,var_dtau_mean_pct_nojumps(:,1).^0.5,'b-','LineWidth',2);
-   plot(cal_60_end,var_dtau_mean_pct_constvol(:,1).^0.5,'r:','LineWidth',2);
+   plot(cal_60_end,var_dtau_mean_pct_constvol_eps(:,1).^0.5,'r:','LineWidth',2);
+   plot(cal_60_end,var_dtau_mean_pct_constvol_dtau(:,1).^0.5,'m-','LineWidth',2);
   hold off;
 
   titstr = '(b) \sigma_{\Delta\tau,{\itt}}';
   title(titstr,'FontSize',18);
-  legend('Baseline','No Outlier Adjustment','Constant Volatility \epsilon_{\itt}');
+  legend('Baseline','No Outlier Adjustment','Constant Volatility \epsilon_{\itt}','Constant Volatility \Delta\tau_{\itt}');
   legend('Location','southoutside', 'Orientation','horizontal');
   xlim(xdates_gt);
   xticks(xticks_gt);
@@ -120,12 +130,13 @@ rng(63761);
   plot(cal_60_end, var_eps_mean_pct_baseline(:,1).^0.5,'k-','LineWidth',4);
   hold on;
    plot(cal_60_end,var_eps_mean_pct_nojumps(:,1).^0.5,'b-','LineWidth',2);
-   plot(cal_60_end,var_eps_mean_pct_constvol(:,1).^0.5,'r:','LineWidth',2);
+   plot(cal_60_end,var_eps_mean_pct_constvol_eps(:,1).^0.5,'r:','LineWidth',2);
+   plot(cal_60_end,var_eps_mean_pct_constvol_dtau(:,1).^0.5,'m-','LineWidth',2);
   hold off;
 
   titstr = '(c) \sigma_{\epsilon,{\itt}}';
   title(titstr,'FontSize',18);
-  legend('Baseline','No Outlier Adjustment','Constant Volatility \epsilon_{\itt}');
+  legend('Baseline','No Outlier Adjustment','Constant Volatility \epsilon_{\itt}','Constant Volatility \Delta\tau_{\itt}');
   legend('Location','southoutside', 'Orientation','horizontal');
   xlim(xdates_gt);
   xticks(xticks_gt);

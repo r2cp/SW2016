@@ -11,9 +11,10 @@ rng(63761);
   % -- File Directories  
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
-  matdir = 'matlab/mat/gtM/';
-  matdir_nojumps = 'matlab/mat/gtM-nojumps/';
-  matdir_constvol = 'matlab/mat/gtM-const_vol_e/';
+  matdir = 'matlab/mat/gtM-poos/';
+  matdir_nojumps = 'matlab/mat/gtM-nojumps-poos/';
+  matdir_constvol_e = 'matlab/mat/gtM-const_vol_e-poos/';
+  matdir_constvol_dtau = 'matlab/mat/gtM-const_vol_dtau-poos/';
   
   % -- Read in Data --- 
   load_data = 1;  % 1 if reloading data from Excel, etc 
@@ -32,7 +33,7 @@ rng(63761);
   dnobs = dnobs_m;
   calds = calds_m;
   
-  label_suffix = '_gtM';
+  label_suffix = '_poos_gtM';
   
   % Dates
   first_date = [2001 1];
@@ -97,7 +98,6 @@ rng(63761);
   
   %% -- Univariate Filtered and Smoothed Values
 
-  % Removed the _poos for now
   % ulabel = ['dp_agg_poos' label_suffix];
 
   % Baseline results for monthly model 
@@ -129,17 +129,29 @@ rng(63761);
 
   % Results from constant volatility of transitory component 
   ulabel = ['dp_agg' label_suffix];
-  str_tmp = [matdir_constvol 'tau_mean_pct' ulabel]; load(str_tmp);
-  tau_f_h_constvol = tau_mean_pct(:,1);
+  str_tmp = [matdir_constvol_e 'tau_mean_pct' ulabel]; load(str_tmp);
+  tau_f_h_constvol_e = tau_mean_pct(:,1);
   
   ulabel = ['dp_xe' label_suffix];
-  str_tmp = [matdir_constvol 'tau_mean_pct' ulabel]; load(str_tmp);
-  tau_f_xe_constvol = tau_mean_pct(:,1);
+  str_tmp = [matdir_constvol_e 'tau_mean_pct' ulabel]; load(str_tmp);
+  tau_f_xe_constvol_e = tau_mean_pct(:,1);
   
   ulabel = ['dp_xfe' label_suffix];
-  str_tmp = [matdir_constvol 'tau_mean_pct' ulabel]; load(str_tmp);
-  tau_f_xfe_constvol = tau_mean_pct(:,1);
+  str_tmp = [matdir_constvol_e 'tau_mean_pct' ulabel]; load(str_tmp);
+  tau_f_xfe_constvol_e = tau_mean_pct(:,1);
 
+  % Results from constant volatility of trend component 
+  ulabel = ['dp_agg' label_suffix];
+  str_tmp = [matdir_constvol_dtau 'tau_mean_pct' ulabel]; load(str_tmp);
+  tau_f_h_constvol_dtau = tau_mean_pct(:,1);
+  
+  ulabel = ['dp_xe' label_suffix];
+  str_tmp = [matdir_constvol_dtau 'tau_mean_pct' ulabel]; load(str_tmp);
+  tau_f_xe_constvol_dtau = tau_mean_pct(:,1);
+  
+  ulabel = ['dp_xfe' label_suffix];
+  str_tmp = [matdir_constvol_dtau 'tau_mean_pct' ulabel]; load(str_tmp);
+  tau_f_xfe_constvol_dtau = tau_mean_pct(:,1);
 
 
 %   % -- Some results for the 17-component model
@@ -204,10 +216,15 @@ rng(63761);
     e_xe_nojumps = repmat(tau_f_xe_nojumps,1,2) - target;
     e_xfe_nojumps = repmat(tau_f_xfe_nojumps,1,2) - target;
 
-    % No outlier-adjustment results
-    e_h_constvol = repmat(tau_f_h_constvol,1,2) - target;
-    e_xe_constvol = repmat(tau_f_xe_constvol,1,2) - target;
-    e_xfe_constvol = repmat(tau_f_xfe_constvol,1,2) - target;
+    % Constant volatility of transitory component 
+    e_h_constvol_e = repmat(tau_f_h_constvol_e,1,2) - target;
+    e_xe_constvol_e = repmat(tau_f_xe_constvol_e,1,2) - target;
+    e_xfe_constvol_e = repmat(tau_f_xfe_constvol_e,1,2) - target;
+
+    % Constant volatility of trend component 
+    e_h_constvol_dtau = repmat(tau_f_h_constvol_dtau,1,2) - target;
+    e_xe_constvol_dtau = repmat(tau_f_xe_constvol_dtau,1,2) - target;
+    e_xfe_constvol_dtau = repmat(tau_f_xfe_constvol_dtau,1,2) - target;
 
 %      e_17c = repmat(tau_f_17c,1,2)- target;
 %      e_3c = repmat(tau_f_3c,1,2)- target;
@@ -244,8 +261,10 @@ rng(63761);
             e_h(:,j) e_xe(:,j) e_xfe(:,j) ... 
             ... % No outlier-adjustment results
             e_h_nojumps(:,j) e_xe_nojumps(:,j) e_xfe_nojumps(:,j) ... 
-            ... % Constant volatility results
-            e_h_constvol(:,j) e_xe_constvol(:,j) e_xfe_constvol(:,j) ... 
+            ... % Constant volatility of transitory component 
+            e_h_constvol_e(:,j) e_xe_constvol_e(:,j) e_xfe_constvol_e(:,j) ... 
+            ... % Constant volatility of trend component 
+            e_h_constvol_dtau(:,j) e_xe_constvol_dtau(:,j) e_xfe_constvol_dtau(:,j) ... 
             ... % Lagged values 
             e_l(:,j) e_l_xe(:,j) e_l_xfe(:,j) ... 
             ... % RW models 
@@ -309,6 +328,8 @@ rng(63761);
       end
     end  
   end
+
+  fclose(fileID);
   
 %   fprintf(fileID,'\n\n Excluding 2008:Q4 \n');  
 %   for i = 1:size(e,2);

@@ -11,7 +11,7 @@ rng(663436);
   % -- File Directories  
   outdir = 'matlab/out/';
   figdir = 'matlab/fig/';
-  matdir = 'matlab/mat/gtM-const_vol_e/';
+  matdir = 'matlab/mat/gtM-const_vol_dtau/';
 
   % -- Read in Data --- 
   load_data = 1;    % 1 if reloading data from Excel, etc 
@@ -100,7 +100,7 @@ rng(663436);
     fprintf(['Carrying out Calculations for ' ulabel '\n']);
     
     y = dp(ismpl==1,iseries);
-    [tau_draws,tau_f_draws,sigma_dtau_draws,sigma_eps_draws,g_eps_draws,g_dtau_draws,scl_eps_draws,sigmatotal_eps_draws,ps_draws] = ucsv_outlier(y,n_burnin,n_draws,k_draws,g_eps_prior,g_dtau_prior,scl_eps_vec,ps_prior);
+    [tau_draws,tau_f_draws,sigma_dtau_draws,sigma_eps_draws,g_eps_draws,g_dtau_draws,scl_eps_draws,sigmatotal_eps_draws,ps_draws] = ucsv_outlier_const_vol_dtau(y,n_burnin,n_draws,k_draws,g_eps_prior,g_dtau_prior,scl_eps_vec,ps_prior);
     
     % IMA(1,1) Parameters
     lam0=(sigma_dtau_draws.^2)+2*(sigma_eps_draws.^2);

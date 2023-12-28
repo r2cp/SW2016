@@ -12,7 +12,7 @@ rng(663436);
   % -- File Directories  
   outdir = '/Users/mwatson/Dropbox/p_comp/revision/matlab/out/';
   figdir = '/Users/mwatson/Dropbox/p_comp/revision/matlab/fig/';
-  matdir = '/Users/mwatson/Dropbox/p_comp/revision/matlab/mat/';
+  matdir = 'matlab/mat/poos_monthly_test/';
 
   
   % -- Read in Data --- 
@@ -33,7 +33,8 @@ rng(663436);
    
   labvec = {'Headline Inflation';'Core XFE';'Core XE'};
   namevec = {'dp_agg';'dp_xfe';'dp_xe'};
-  dp = [dp_agg dp_agg_xfe dp_agg_xe];
+%   dp = [dp_agg dp_agg_xfe dp_agg_xe];
+  dp = [dp_agg];
 
   % Dates
   first_date = [1960 1];
@@ -51,8 +52,8 @@ rng(663436);
   
   % Parameters for UCSV Draws
   % Draws for pre-poos period
-  n_burnin = 2000;     % Discarded Draws
-  n_draws_save = 2000;  % Number of Draws to Save
+  n_burnin = 100;     % Discarded Draws
+  n_draws_save = 100;  % Number of Draws to Save
   k_draws = 5;          % Save results every k_draws
   
   % Parameters for scale mixture of epsilon component
@@ -85,12 +86,14 @@ rng(663436);
   g_eps_prior = [g_eps_values p_g_eps_values];
   g_dtau_prior = [g_dtau_values p_g_dtau_values];
    
-  for iseries = 1:size(dp,2);
-    str_name = char(namevec(iseries));
+  for iseries = 1:size(dp,2)
+    
+      str_name = char(namevec(iseries));
     ulabel = [str_name '_poos_' outlabel]; 
     fprintf(['Carrying out Calculations for ' ulabel '\n']);
     datetime('now');
     y = dp(ismpl==1,iseries);
+
     % Scale y:  This scale matters because of the off-set parameters "c" in 
     % draw_lcs_indicators and draw_sigma;
     dy = y(2:end)-y(1:end-1);
@@ -110,8 +113,10 @@ rng(663436);
       sigma_dtau = ones(t,1);
       scale_eps = ones(t,1);
       ps = ps_prior(1)/(ps_prior(1)+ps_prior(2));
+      
       % Burnin Draws
       [tau,tau_f,sigma_dtau,sigma_eps,g_eps,g_dtau,scale_eps,ps] = ucsv_outlier_draw(yn(1:t),n_burnin,sigma_eps,sigma_dtau,scale_eps,ps,g_eps_prior,g_dtau_prior,scl_eps_vec,ps_prior);
+      
       % MCMC Draws to save at date t
       for i = 1:n_draws_save;
        [tau,tau_f,sigma_dtau,sigma_eps,g_eps,g_dtau,scale_eps,ps] = ucsv_outlier_draw(yn(1:t),k_draws,sigma_eps,sigma_dtau,scale_eps,ps,g_eps_prior,g_dtau_prior,scl_eps_vec,ps_prior);
